@@ -1,0 +1,37 @@
+{
+  "env": {
+  },
+  "stages":{
+    "serve":{
+      "script":[
+        "ng server --host=0.0.0.0"
+      ]
+    },
+    "build":{
+      "script":[
+        "ng build"
+      ]
+    },
+    "build-prod":{
+      "script":[
+        "ng build --prod"
+      ]
+    },
+    "docker-build":{
+      "script":[
+        "docker build --no-cache -t tln-angular:latest ."
+      ]
+    },
+    "docker-run":{
+      "script":[
+        "docker run -d --rm -p 80:80 --name tln-angular tln-angular:latest"
+      ]
+    },
+    "docker-stop":{
+      "script":[
+        "docker stop tln-angular",
+        "docker rmi tln-angular:latest"
+      ]
+    }
+  }
+}
