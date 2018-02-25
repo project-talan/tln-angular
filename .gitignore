@@ -105,3 +105,5 @@ typings/
 # dotenv environment variables file
 .env
 
+# SonarQube output
+.scannerwork

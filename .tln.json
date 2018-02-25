@@ -2,19 +2,34 @@
   "env": {
   },
   "stages":{
-    "serve":{
-      "script":[
-        "ng server --host=0.0.0.0"
-      ]
-    },
     "build":{
       "script":[
         "ng build"
       ]
     },
+    "test":{
+      "script":[
+        "ng test --code-coverage"
+      ]
+    },
+    "lint":{
+      "script":[
+        "ng lint --format=prose --type-check=true"
+      ]
+    },
     "build-prod":{
       "script":[
         "ng build --prod"
+      ]
+    },
+    "serve":{
+      "script":[
+        "ng server --host=0.0.0.0"
+      ]
+    },
+    "sonar":{
+      "script":[
+        "~/projects/sonar-scanner-3.0.3.778/bin/sonar-scanner -X"
       ]
     },
     "docker-run":{
