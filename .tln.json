@@ -3,37 +3,37 @@
   },
   "stages":{
     "build":{
-      "script":[
+      "cmds":[
         "ng build"
       ]
     },
     "test":{
-      "script":[
+      "cmds":[
         "ng test --code-coverage"
       ]
     },
     "lint":{
-      "script":[
+      "cmds":[
         "ng lint --format=prose --type-check=true"
       ]
     },
     "build-prod":{
-      "script":[
+      "cmds":[
         "ng build --prod"
       ]
     },
     "serve":{
-      "script":[
+      "cmds":[
         "ng server --host=0.0.0.0"
       ]
     },
     "sonar":{
-      "script":[
+      "cmds":[
         "~/projects/sonar-scanner-3.0.3.778/bin/sonar-scanner -X"
       ]
     },
     "docker-run":{
-      "script":[
+      "cmds":[
         "export STATIC_ANGULAR_HOSTNAME=0.0.0.0",
         "export STATIC_ANGULAR_PORT=80",
         "export STATIC_ANGULAR_PORTS=443",
@@ -45,7 +45,7 @@
       ]
     },
     "docker-stop":{
-      "script":[
+      "cmds":[
         "docker stop tln-angular",
         "docker rmi tln-angular:latest"
       ]
