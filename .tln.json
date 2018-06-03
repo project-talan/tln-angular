@@ -11,6 +11,7 @@
     },
     "build":{
       "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng build"
       ]
     },
@@ -53,7 +54,7 @@
     "docker-run":{
       "shell":[
         "export $(cat ./.env | grep -v ^# | xargs)",
-        "docker run -d --rm -p $PROJECT_PARAM_PORT:$PROJECT_PARAM_PORT -p $PROJECT_PARAM_PORTS:$PROJECT_PARAM_PORTS --name ${PROJECT_KEY} ${PROJECT_KEY}:${PROJECT_VERSION}"
+        "docker run -d --rm -p $PROJECT_PARAM_PORT:80 -p $PROJECT_PARAM_PORTS:443 --name ${PROJECT_KEY} ${PROJECT_KEY}:${PROJECT_VERSION}"
       ]
     },
     "docker-stop":{

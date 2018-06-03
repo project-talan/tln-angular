@@ -59,9 +59,14 @@ node {
     echo "[lastCommitAuthorEmail:${lastCommitAuthorEmail}]"
   }
   //
-  stage('Build & Unit tests') {
+  stage('Build') {
     sh './prereq.sh'
     sh './build.sh'
+  }
+  //
+  stage('Unit tests') {
+    sh './lint.sh'
+    sh './test.sh'
   }
   /*/
   stage('SonarQube analysis') {

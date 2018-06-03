@@ -1,3 +1,4 @@
 #!/bin/bash -e
-docker stop tln-angular
-docker rmi tln-angular:latest
+export $(cat ./.env | grep -v ^# | xargs)
+docker stop ${PROJECT_KEY}
+docker rmi ${PROJECT_KEY}:${PROJECT_VERSION}
