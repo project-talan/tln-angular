@@ -1,5 +1,5 @@
 sonar.projectKey=${PROJECT_KEY}
-sonar.projectName=${PROJECT_VERSION}
+sonar.projectName=${PROJECT_NAME}
 sonar.projectVersion=${PROJECT_VERSION}
 sonar.sourceEncoding=UTF-8
 sonar.sources=src

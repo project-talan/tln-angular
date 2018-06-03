@@ -1,6 +1,6 @@
 {
   "name": "tln-angular",
-  "version": "18.3.0-SNAPSHOT",
+  "version": "18.6.0-SNAPSHOT",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
