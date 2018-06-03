@@ -1,9 +1,6 @@
-sonar.host.url=http://159.65.230.204:9000
-sonar.login=7fbc41a59be794cd1931ce10948a8aab7a8697ff
-
-sonar.projectKey=tln-angular
-sonar.projectName=tln-angular
-sonar.projectVersion=18.3.0-SNAPSHOT
+sonar.projectKey=${PROJECT_KEY}
+sonar.projectName=${PROJECT_NAME}
+sonar.projectVersion=${PROJECT_VERSION}
 sonar.sourceEncoding=UTF-8
 sonar.sources=src
 sonar.exclusions=**/node_modules/**,**/*.spec.ts

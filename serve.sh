@@ -1,2 +1,3 @@
 #!/bin/bash -e
-ng server --host=0.0.0.0
+export $(cat ./.env | grep -v ^# | xargs)
+ng server --host=${PROJECT_PARAM_LSTN} --port=${PROJECT_PARAM_PORT}

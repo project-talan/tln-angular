@@ -2,52 +2,66 @@
   "env": {
   },
   "stages":{
+    "prereq":{
+      "shell":[
+        "envsubst > sonar-project.properties < sonar-project.properties.template",
+        "envsubst > .env < .env.template",
+        "npm i"
+      ]
+    },
     "build":{
-      "cmds":[
+      "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng build"
       ]
     },
     "test":{
-      "cmds":[
+      "shell":[
         "ng test --code-coverage"
       ]
     },
     "lint":{
-      "cmds":[
+      "shell":[
         "ng lint --format=prose --type-check=true"
       ]
     },
     "build-prod":{
-      "cmds":[
+      "shell":[
         "ng build --prod"
       ]
     },
     "serve":{
-      "cmds":[
-        "ng server --host=0.0.0.0"
+      "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "ng server --host=${PROJECT_PARAM_LSTN} --port=${PROJECT_PARAM_PORT}"
       ]
     },
     "sonar":{
-      "cmds":[
+      "shell":[
         "~/projects/sonar-scanner-3.0.3.778/bin/sonar-scanner -X"
       ]
     },
+    "docker-build":{
+      "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "docker build --build-arg PROJECT_PARAM_HOST=$PROJECT_PARAM_HOST \\",
+        "             --build-arg PROJECT_PARAM_LSTN=$PROJECT_PARAM_LSTN \\",
+        "             --build-arg PROJECT_PARAM_PORT=$PROJECT_PARAM_PORT \\",
+        "             --build-arg PROJECT_PARAM_PORTS=$PROJECT_PARAM_PORTS \\",
+        "             -t ${PROJECT_KEY}:${PROJECT_VERSION} ."
+      ]
+    },
     "docker-run":{
-      "cmds":[
-        "export STATIC_ANGULAR_HOSTNAME=0.0.0.0",
-        "export STATIC_ANGULAR_PORT=80",
-        "export STATIC_ANGULAR_PORTS=443",
-        "docker build --build-arg STATIC_ANGULAR_HOSTNAME=$STATIC_ANGULAR_HOSTNAME \\",
-        "             --build-arg STATIC_ANGULAR_PORT=$STATIC_ANGULAR_PORT \\",
-        "             --build-arg STATIC_ANGULAR_PORTS=$STATIC_ANGULAR_PORTS \\",
-        "             -t tln-angular:latest .",
-        "docker run -d --rm -p $STATIC_ANGULAR_PORT:$STATIC_ANGULAR_PORT -p $STATIC_ANGULAR_PORTS:$STATIC_ANGULAR_PORTS --name tln-angular tln-angular:latest"
+      "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "docker run -d --rm -p $PROJECT_PARAM_PORT:80 -p $PROJECT_PARAM_PORTS:443 --name ${PROJECT_KEY} ${PROJECT_KEY}:${PROJECT_VERSION}"
       ]
     },
     "docker-stop":{
-      "cmds":[
-        "docker stop tln-angular",
-        "docker rmi tln-angular:latest"
+      "shell":[
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "docker stop ${PROJECT_KEY}",
+        "docker rmi ${PROJECT_KEY}:${PROJECT_VERSION}"
       ]
     }
   }
