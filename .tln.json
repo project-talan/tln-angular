@@ -27,8 +27,8 @@
     },
     "build-prod":{
       "shell":[
-        "ng build --prod"
-      ]
+        "ng build --prod --env=prod"
+     ]
     },
     "serve":{
       "shell":[
