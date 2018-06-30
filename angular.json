@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "tln-angular": {
+    "org.talan.angular": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",

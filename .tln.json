@@ -17,12 +17,14 @@
     },
     "test":{
       "shell":[
-        "ng test --code-coverage"
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "ng test ${COMPONENT_KEY} --code-coverage"
       ]
     },
     "lint":{
       "shell":[
-        "ng lint --format=prose --type-check=true"
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "ng lint ${COMPONENT_KEY} --format=prose --type-check=true"
       ]
     },
     "build.prod":{

@@ -1,2 +1,3 @@
 #!/bin/bash -e
-ng test --code-coverage
+export $(cat ./.env | grep -v ^# | xargs)
+ng test ${COMPONENT_KEY} --code-coverage
