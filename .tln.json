@@ -25,15 +25,15 @@
         "ng lint --format=prose --type-check=true"
       ]
     },
-    "build-prod":{
+    "build.prod":{
       "shell":[
-        "ng build --prod --env=prod"
+        "ng build --configuration=production"
      ]
     },
     "serve":{
       "shell":[
         "export $(cat ./.env | grep -v ^# | xargs)",
-        "ng server --host=${PROJECT_PARAM_LSTN} --port=${PROJECT_PARAM_PORT}"
+        "ng server --host=${COMPONENT_PARAM_LSTN} --port=${COMPONENT_PARAM_PORT}"
       ]
     },
     "sonar":{
@@ -41,27 +41,27 @@
         "~/projects/sonar-scanner-3.0.3.778/bin/sonar-scanner -X"
       ]
     },
-    "docker-build":{
+    "docker.build":{
       "shell":[
         "export $(cat ./.env | grep -v ^# | xargs)",
-        "docker build --build-arg PROJECT_PARAM_HOST=$PROJECT_PARAM_HOST \\",
-        "             --build-arg PROJECT_PARAM_LSTN=$PROJECT_PARAM_LSTN \\",
-        "             --build-arg PROJECT_PARAM_PORT=$PROJECT_PARAM_PORT \\",
-        "             --build-arg PROJECT_PARAM_PORTS=$PROJECT_PARAM_PORTS \\",
-        "             -t ${PROJECT_KEY}:${PROJECT_VERSION} ."
+        "docker build --build-arg COMPONENT_PARAM_HOST=${COMPONENT_PARAM_HOST} \\",
+        "             --build-arg COMPONENT_PARAM_LSTN=${COMPONENT_PARAM_LSTN} \\",
+        "             --build-arg COMPONENT_PARAM_PORT=${COMPONENT_PARAM_PORT} \\",
+        "             --build-arg COMPONENT_PARAM_PORTS=${COMPONENT_PARAM_PORTS} \\",
+        "             -t ${COMPONENT_KEY}:${COMPONENT_VERSION} ."
       ]
     },
-    "docker-run":{
+    "docker.run":{
       "shell":[
         "export $(cat ./.env | grep -v ^# | xargs)",
-        "docker run -d --rm -p $PROJECT_PARAM_PORT:80 -p $PROJECT_PARAM_PORTS:443 --name ${PROJECT_KEY} ${PROJECT_KEY}:${PROJECT_VERSION}"
+        "docker run -d --rm -p ${COMPONENT_PARAM_PORT}:80 -p ${COMPONENT_PARAM_PORTS}:443 --name ${COMPONENT_KEY} ${COMPONENT_KEY}:${COMPONENT_VERSION}"
       ]
     },
-    "docker-stop":{
+    "docker.stop":{
       "shell":[
         "export $(cat ./.env | grep -v ^# | xargs)",
-        "docker stop ${PROJECT_KEY}",
-        "docker rmi ${PROJECT_KEY}:${PROJECT_VERSION}"
+        "docker stop ${COMPONENT_KEY}",
+        "docker rmi ${COMPONENT_KEY}:${COMPONENT_VERSION}"
       ]
     }
   }
