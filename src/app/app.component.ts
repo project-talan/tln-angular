@@ -13,19 +13,19 @@ import { of } from 'rxjs';
 })
 export class AppComponent {
 
-  requestType: string = 'GET';
-  requestUrl: string = 'http://46.101.7.84:9081/stats';//'http://localhost:9080';
-  withCredentials: boolean = true;
-  requestBody: string = '{}';
-  response: string = '';
-  success: boolean = false;
+  requestType = 'GET';
+  requestUrl = 'http://46.101.7.84:9081/stats'; // 'http://localhost:9080';
+  withCredentials = true;
+  requestBody = '{}';
+  response = '';
+  success = false;
 
   constructor(private http: HttpClient) {
   }
-  
+
   onSend() {
     this.response = '';
-    const options = {  
+    const options = {
 //      headers:new HttpHeaders ({
 //        "Content-Type": "application/json"
 //      }),
@@ -52,16 +52,15 @@ export class AppComponent {
       }
     );
   }
-  
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: HttpErrorResponse): Observable<T> => {
       console.error(error); // log to console instead
       console.error(result); // log to console instead
-      throw(`${operation} failed [${error.message}]`); // use this for subscribe(error:) to fire
+      throw new Error(`${operation} failed [${error.message}]`); // use this for subscribe(error:) to fire
       // Let the app keep running by returning an empty result.
-      //return of(result as T);
-      
+      // return of(result as T);
     };
   }
-  
+
 }
