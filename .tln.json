@@ -61,6 +61,18 @@
         "docker run -d --rm -p ${COMPONENT_PARAM_PORT}:80 -p ${COMPONENT_PARAM_PORTS}:443 --name ${COMPONENT_ID} ${COMPONENT_ID}:${COMPONENT_VERSION}"
       ]
     },
+    "docker.save":{
+      "shell":[
+        ". ./.env.sh",
+        "docker save -o ${COMPONENT_ID}-${COMPONENT_VERSION}.tar ${COMPONENT_ID}:${COMPONENT_VERSION}"
+      ]
+    },
+    "docker.load":{
+      "shell":[
+        ". ./.env.sh",
+        "docker load -i ${COMPONENT_ID}-${COMPONENT_VERSION}.tar"
+      ]
+    },
     "docker.stop":{
       "shell":[
         ". ./.env.sh",
