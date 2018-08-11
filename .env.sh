@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # can be used for standalon project
-#:'
+#: '
 export $(cat ./.env | grep -v ^# | xargs)
 #'
 
