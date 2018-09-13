@@ -1,3 +1,3 @@
 #!/bin/bash -e
-. ./.env.sh
+export $(cat ./.env | grep -v ^# | xargs)
 docker load -i ${COMPONENT_ID}-${COMPONENT_VERSION}.tar

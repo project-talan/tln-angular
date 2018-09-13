@@ -11,71 +11,71 @@
     },
     "build":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng build"
       ]
     },
     "test":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng test ${COMPONENT_ID} --code-coverage"
       ]
     },
     "lint":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng lint ${COMPONENT_ID} --format=prose --type-check=true"
       ]
     },
     "build.prod":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng build --configuration=production"
      ]
     },
     "serve":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "ng serve --host=${COMPONENT_PARAM_LSTN} --port=${COMPONENT_PARAM_PORT}"
       ]
     },
     "sonar":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "~/projects/sonar-scanner-3.0.3.778/bin/sonar-scanner -X"
       ]
     },
     "docker.build":{
       "shell":[
-        ". ./.env.sh",
-        "docker build --build-arg COMPONENT_PARAM_HOST=${COMPONENT_PARAM_HOST} \\",
-        "             --build-arg COMPONENT_PARAM_LSTN=${COMPONENT_PARAM_LSTN} \\",
-        "             --build-arg COMPONENT_PARAM_PORT=${COMPONENT_PARAM_PORT} \\",
-        "             --build-arg COMPONENT_PARAM_PORTS=${COMPONENT_PARAM_PORTS} \\",
-        "             -t ${COMPONENT_ID}:${COMPONENT_VERSION} ."
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "docker build \\",
+        "  -t ${COMPONENT_ID}:${COMPONENT_VERSION} ."
       ]
     },
     "docker.run":{
       "shell":[
-        ". ./.env.sh",
-        "docker run -d --rm -p ${COMPONENT_PARAM_PORT}:80 -p ${COMPONENT_PARAM_PORTS}:443 --name ${COMPONENT_ID} ${COMPONENT_ID}:${COMPONENT_VERSION}"
+        "export $(cat ./.env | grep -v ^# | xargs)",
+        "docker run -d --rm \\",
+        "  -p ${COMPONENT_PARAM_PORT}:80 \\",
+        "  -p ${COMPONENT_PARAM_PORTS}:443 \\",
+        "  --name ${COMPONENT_ID} ${COMPONENT_ID}:${COMPONENT_VERSION}"
       ]
     },
     "docker.save":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "docker save -o ${COMPONENT_ID}-${COMPONENT_VERSION}.tar ${COMPONENT_ID}:${COMPONENT_VERSION}"
       ]
     },
     "docker.load":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "docker load -i ${COMPONENT_ID}-${COMPONENT_VERSION}.tar"
       ]
     },
     "docker.stop":{
       "shell":[
-        ". ./.env.sh",
+        "export $(cat ./.env | grep -v ^# | xargs)",
         "docker stop ${COMPONENT_ID}",
         "docker rmi ${COMPONENT_ID}:${COMPONENT_VERSION}"
       ]

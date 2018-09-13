@@ -1,3 +1,3 @@
 #!/bin/bash -e
-. ./.env.sh
+export $(cat ./.env | grep -v ^# | xargs)
 ng test ${COMPONENT_ID} --code-coverage
