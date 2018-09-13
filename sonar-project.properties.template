@@ -1,9 +1,9 @@
 sonar.host.url=${SONARQUBE_HOST}
 sonar.login=${SONARQUBE_TOKEN}
 
-sonar.projectKey=${PROJECT_KEY}
-sonar.projectName=${PROJECT_NAME}
-sonar.projectVersion=${PROJECT_VERSION}
+sonar.projectKey=${COMPONENT_ID}
+sonar.projectName=${COMPONENT_ID}
+sonar.projectVersion=${COMPONENT_VERSION}
 sonar.sourceEncoding=UTF-8
 sonar.sources=src
 sonar.exclusions=**/node_modules/**,**/*.spec.ts
