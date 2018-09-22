@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit {
       },
       (err) => {
         this.success = false;
-        //console.log(err);
+        // console.log(err);
         this.response = err;
       },
       () => {
@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit {
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: HttpErrorResponse): Observable<T> => {
       console.error(error); // log to console instead
-      //console.error(result); // log to console instead
+      // console.error(result); // log to console instead
       throw new Error(`${operation} failed [${error.message}]`); // use this for subscribe(error:) to fire
       // Let the app keep running by returning an empty result.
       // return of(result as T);

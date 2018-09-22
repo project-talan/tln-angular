@@ -21,7 +21,7 @@ import { HomeComponent } from './pages/home/home.component';
     FormsModule,
     HttpClientModule,
     Routing,
-    NgbModule.forRoot()
+    NgbModule
   ],
   providers: [],
   bootstrap: [AppComponent]
