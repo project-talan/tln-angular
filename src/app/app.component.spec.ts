@@ -21,13 +21,13 @@ describe('AppComponent', () => {
   it(`should have as title 'app'`, async(() => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    //expect(app.title).toEqual('Project Talan - Angular skeleton');
+    // expect(app.title).toEqual('Project Talan - Angular skeleton');
   }));
   it('should render title in a h1 tag', async(() => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.debugElement.nativeElement;
-    //expect(compiled.querySelector('h3').textContent).toContain('Project Talan - Angular skeleton');
+    // expect(compiled.querySelector('h3').textContent).toContain('Project Talan - Angular skeleton');
   }));
 
 });
