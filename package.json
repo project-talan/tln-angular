@@ -1,6 +1,6 @@
 {
   "name": "org.talan.angular",
-  "version": "18.7.0",
+  "version": "18.10.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
