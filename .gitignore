@@ -109,3 +109,5 @@ typings/
 .scannerwork
 
 sonar-project.properties
+default.conf
+ssl
