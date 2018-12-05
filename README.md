@@ -16,7 +16,7 @@ git subtree pull --prefix static/html tln-angular master --squash
 
 ### Fork/clone repository
 
-To develop standalone project, just copy full repository or create fork using you account
+To develop standalone project, just clone repository or create fork using your account
 
 ### Apply necessary configuration
 
