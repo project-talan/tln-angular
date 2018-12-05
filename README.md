@@ -1,8 +1,9 @@
-# TlnAngular
+# Angular (7) skeleton application
 
-# Getting started
+## Getting started
 
-## Attach to the existing project
+### Attach to the existing project
+
 * Add skeleton as subtree
 ```
 git remote add tln-angular https://github.com/project-talan/tln-angular.git
@@ -13,14 +14,20 @@ git subtree add --prefix static/html tln-angular master --squash
 git subtree pull --prefix static/html tln-angular master --squash
 ```
 
-## Fork/clone repository
+### Fork/clone repository
 
+To develop standalone project, just copy full repository or create fork using you account
 
-* update project id
+### Apply necessary configuration
+
+#### Update project id
+
 * replace all accurencies of string 'org.talan.angular' to you project id (for example 'com.company.project') inside angular.json
 
 
-# HTTP/HTTPS
+### HTTP/HTTPS
+
+* TBA
 
 
 ## Development server
