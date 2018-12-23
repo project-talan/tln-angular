@@ -13,6 +13,9 @@ def printTopic(topic) {
 }
 
 node {
+  // nodejs configuration
+  env.NODEJS_HOME = "${tool 'node-9.x'}"
+  env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
   //
   def pullRequest = false
   def commitSha = ''
