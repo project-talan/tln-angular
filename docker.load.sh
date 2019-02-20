@@ -1,3 +1,3 @@
 #!/bin/bash -e
 export $(cat ./.env | grep -v ^# | xargs)
-docker load -i ${COMPONENT_ID}-${COMPONENT_VERSION}.tar
+docker load -i ${TLN_COMPONENT_ID}-${TLN_COMPONENT_VERSION}.tar
