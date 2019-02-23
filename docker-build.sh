@@ -1,5 +1,5 @@
 #!/bin/bash -e
-export $(cat ./.env | grep -v ^# | xargs)
+if [ -f ./.env ]; then export $(cat ./.env | grep -v ^# | xargs); fi
 rm -rf ./target || true
 mkdir target
 mkdir target/conf.d
