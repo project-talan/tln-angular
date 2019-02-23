@@ -1,3 +1,3 @@
 #!/bin/bash -e
-export $(cat ./.env | grep -v ^# | xargs)
-ng serve --host=${TLN_COMPONENT_PARAM_LSTN} --port=${TLN_COMPONENT_PARAM_PORT}
+if [ -f ./.env ]; then export $(cat ./.env | grep -v ^# | xargs); fi
+ng serve --host=${COMPONENT_PARAM_LSTN} --port=${COMPONENT_PARAM_PORT}

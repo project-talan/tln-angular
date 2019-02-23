@@ -1,3 +1,3 @@
 #!/bin/bash -e
-export $(cat ./.env | grep -v ^# | xargs)
-ng test ${TLN_COMPONENT_ID} --code-coverage
+if [ -f ./.env ]; then export $(cat ./.env | grep -v ^# | xargs); fi
+ng test ${COMPONENT_ID} --code-coverage

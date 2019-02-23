@@ -1,3 +1,3 @@
 #!/bin/bash -e
-export $(cat ./.env | grep -v ^# | xargs)
-ng lint ${TLN_COMPONENT_ID} --format=prose --type-check=true
+if [ -f ./.env ]; then export $(cat ./.env | grep -v ^# | xargs); fi
+ng lint ${COMPONENT_ID} --format=prose --type-check=true

@@ -1,3 +1,35 @@
+def configBuildEnv(configFile) {
+  def tools = [
+    'openjdk': ['envs':['JAVA_HOME'], 'paths':['/bin'], 'validate':'java -version'],
+    'nodejs': ['envs':['NODEJS_HOME'], 'paths':['/bin'], 'validate':'node -v'],
+    'maven': ['envs':['MAVEN_HOME', 'M2_HOME'], 'paths':['/bin'], 'validate':'mvn -v']
+  ]
+  def config = [:]
+  if (fileExists(configFile)) {
+    print("Use Configuration from ${configFile}")
+    config = readJSON file: configFile
+  }else{
+    print('Default VM setup will be used')
+  }
+  printTopic('Build environment config')
+  print(config)
+  // configure
+  config.each { prop, val -> 
+    if (tools[prop]) {
+      sh "echo Configurint ${prop} using ${val} version"
+      def t = tool "${val}"
+      tools[prop].envs.each { e ->
+        env[e] = "${t}"
+      }
+      tools[prop].paths.each { p ->
+        env.PATH = "${t}${p}:${env.PATH}"
+      }
+      // validate setup
+      sh "${tools[prop].validate}"
+    }
+  }
+}
+
 def sendEmailNotification(subj, recepients) {
     emailext body: "${BUILD_URL}",
     recipientProviders: [
@@ -13,9 +45,6 @@ def printTopic(topic) {
 }
 
 node {
-  // nodejs configuration
-  env.NODEJS_HOME = "${tool 'node-9.x'}"
-  env.PATH="${env.NODEJS_HOME}/bin:${env.PATH}"
   //
   def pullRequest = false
   def commitSha = ''
@@ -32,6 +61,8 @@ node {
     println(params)
     printTopic('SCM variables')
     println(scmVars)
+    // configure build env
+    configBuildEnv('build.conf.json');
     //
     commitSha = scmVars.GIT_COMMIT
     buildBranch = scmVars.GIT_BRANCH
