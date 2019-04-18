@@ -35,7 +35,7 @@ COMPONENT_PARAM_PORTS=443
 
 ### HTTP/HTTPS
 
-* During deployment procedure, create ssl folder under with two sertificates. Use your project id as files names
+* During deployment procedure, create ssl folder under project's root with two sertificates. Use your project id as files' names
 ```
   io.company.project.key
   io.company.project.crt
