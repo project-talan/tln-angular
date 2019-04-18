@@ -14,20 +14,33 @@ git subtree add --prefix static/html tln-angular master --squash
 git subtree pull --prefix static/html tln-angular master --squash
 ```
 
-### Fork/clone repository
+### or Fork/clone repository
 
 To develop standalone project, just clone repository or create fork using your account
 
-### Apply necessary configuration
+### Refresh configuration
+
+#### Prepare .env file
+* Copy **.env.template** file to **.env**
+* Fill environment variables
+```
+COMPONENT_ID=io.company.project
+COMPONENT_VERSION=19.4.0
+
+COMPONENT_PARAM_HOST=company.io
+COMPONENT_PARAM_LSTN=0.0.0.0
+COMPONENT_PARAM_PORT=80
+COMPONENT_PARAM_PORTS=443
+```
 
 #### Update project id
 
-* replace all accurencies of string 'org.talan.angular' to you project id (for example 'com.company.project') inside angular.json
+* replace all accurencies of string **'org.talan.angular'** to you project id (for example **'com.company.project'**) inside angular.json
 
 
 ### HTTP/HTTPS
 
-* TBA
+* During deployment procedure, create ssl folder under 
 
 
 ## Development server
