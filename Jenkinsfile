@@ -102,7 +102,7 @@ node {
     sh './lint.sh'
     sh './test.sh'
   }
-  /*/
+  //
   stage('SonarQube analysis') {
     def scannerHome = tool "${SONARQUBE_SCANNER}"
     withSonarQubeEnv("${SONARQUBE_SERVER}") {
@@ -138,7 +138,7 @@ node {
       }
     }
   }
-  /*/
+  //
   /*/
   stage('Deploy & Publish') {
     if (pullRequest){
