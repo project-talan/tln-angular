@@ -83,6 +83,7 @@ node {
     org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $3}' | rev''').trim()
     //
     printTopic('Repo parameters')
+    echo sh(returnStdout: true, script: 'git config --get remote.origin.url')
     echo "[org:${org}] [repo:${repo}]"
     //
     lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log --format="%ae" HEAD^!''').trim()
