@@ -96,6 +96,7 @@ node {
   //
   stage('Build') {
     sh './prereq.sh'
+    sh './init.sh'
     sh './build.sh'
   }
   //
