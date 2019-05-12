@@ -79,10 +79,11 @@ node {
     printTopic('Environment variables')
     echo sh(returnStdout: true, script: 'env')
     //
-    repo = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $2}' | rev''').trim()
-    org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $3}' | rev''').trim()
+    org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $2}' | rev''').trim()
+    repo = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $1}' | rev''').trim()
     //
     printTopic('Repo parameters')
+    echo sh(returnStdout: true, script: 'git config --get remote.origin.url')
     echo "[org:${org}] [repo:${repo}]"
     //
     lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log --format="%ae" HEAD^!''').trim()
@@ -102,14 +103,16 @@ node {
     sh './lint.sh'
     sh './test.sh'
   }
-  /*/
+  //
   stage('SonarQube analysis') {
+    printTopic('Sonarqube properties')
+    echo sh(returnStdout: true, script: 'cat sonar-project.properties')
     def scannerHome = tool "${SONARQUBE_SCANNER}"
     withSonarQubeEnv("${SONARQUBE_SERVER}") {
       if (pullRequest){
         sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${pullId} -Dsonar.github.repository=${org}/${repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
       } else {
-        sh "${scannerHome}/bin/sonar-scanner"
+        sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
         // check SonarQube Quality Gates
         //// Pipeline Utility Steps
         def props = readProperties  file: '.scannerwork/report-task.txt'
@@ -138,7 +141,7 @@ node {
       }
     }
   }
-  /*/
+  //
   /*/
   stage('Deploy & Publish') {
     if (pullRequest){

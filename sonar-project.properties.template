@@ -1,5 +1,5 @@
-sonar.host.url=${SONARQUBE_HOST}
-sonar.login=${SONARQUBE_TOKEN}
+#sonar.host.url=${SONARQUBE_HOST}
+#sonar.login=${SONARQUBE_ACCESS_TOKEN}
 
 sonar.projectKey=${COMPONENT_ID}
 sonar.projectName=${COMPONENT_ID}
