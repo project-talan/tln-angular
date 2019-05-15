@@ -79,8 +79,8 @@ node {
     packageJson = readJSON file: 'package.json'
     env.COMPONENT_ID = packageJson.name
     env.COMPONENT_VERSION = packageJson.version
-    //
     echo sh(returnStdout: true, script: 'rm -f .env sonar-project.properties')
+    //
     printTopic('Build info')
     echo "[PR:${pullRequest}] [BRANCH:${buildBranch}] [COMMIT: ${commitSha}] [PULL ID: ${pullId}]"
     printTopic('Environment variables')
