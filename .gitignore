@@ -110,4 +110,5 @@ typings/
 
 sonar-project.properties
 default.conf
-ssl
+/ssl
+/mobile
