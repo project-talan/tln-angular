@@ -102,17 +102,14 @@ node {
   }
   //
   stage('Build') {
-    sh './prereq.sh'
-    sh './init.sh'
-    sh './build.sh'
+    sh 'tln prereq:init:build'
   }
   //
   stage('Unit tests') {
-    sh './lint.sh'
-    sh './test.sh'
+    sh 'tln lint:test'
   }
   //
-  stage('SonarQube analysis') {
+  stage('SonarQube') {
     printTopic('Sonarqube properties')
     echo sh(returnStdout: true, script: 'cat sonar-project.properties')
     def scannerHome = tool "${SONARQUBE_SCANNER}"
@@ -150,13 +147,15 @@ node {
     }
   }
   //
-  /*/
-  stage('Deploy & Publish') {
-    if (pullRequest){
-    } else {
-      sh "./upload.sh ${groupId} ${artifactId} ${version} ./services/grizzly-jersey/target"
-    }
+  stage('Delivery') {
+    //if (pullRequest){
+    //} else {
+    //  sh "./upload.sh ${groupId} ${artifactId} ${version} ./services/grizzly-jersey/target"
+    //}
     //archiveArtifacts artifacts: 'mobile/platforms/android/build/outputs/apk/*.apk'
   }
-  /*/
+  //
+  stage('Deploy') {
+  }
+  //
 }
