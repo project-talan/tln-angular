@@ -1,8 +1,8 @@
 #sonar.host.url=${SONARQUBE_HOST}
 #sonar.login=${SONARQUBE_ACCESS_TOKEN}
 
-sonar.projectKey=${COMPONENT_ID}
-sonar.projectName=${COMPONENT_ID}
+sonar.projectKey=org.talan.angular
+sonar.projectName=org.talan.angular
 sonar.projectVersion=${COMPONENT_VERSION}
 sonar.sourceEncoding=UTF-8
 sonar.sources=src
