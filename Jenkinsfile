@@ -71,12 +71,9 @@ node {
     // Get information from project's config
     printTopic('Package info')
     packageJson = readJSON file: 'package.json'
-    println(packageJson)
-    println(packageJson.name)
     env.COMPONENT_ID = packageJson.name
     env.COMPONENT_VERSION = packageJson.version
     def ids = packageJson.name.split('[.]') as List
-    println(ids)
     env.COMPONENT_ARTIFACT_ID = ids.removeAt(ids.size()-1)
     env.COMPONENT_GROUP_ID = ids.join('.')
   }
