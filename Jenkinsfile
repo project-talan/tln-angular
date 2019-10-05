@@ -161,8 +161,8 @@ node {
 /*
  *
  */
-def sendEmailNotification(subj, recepients) {
-    emailext body: "${BUILD_URL}",
+def sendEmailNotification(subj, recepients, traceStack) {
+    emailext body: "${BUILD_URL}\n${traceStack}",
     recipientProviders: [
       [$class: 'CulpritsRecipientProvider'],
       [$class: 'DevelopersRecipientProvider'],
