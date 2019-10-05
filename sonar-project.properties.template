@@ -1,9 +1,17 @@
-#sonar.host.url=${SONARQUBE_HOST}
-#sonar.login=${SONARQUBE_ACCESS_TOKEN}
+#sonar.host.url=
+#sonar.login=
+#sonar.password=
 
-sonar.projectKey=org.talan.angular
-sonar.projectName=org.talan.angular
+sonar.projectKey=${COMPONENT_ID}
+sonar.projectName=${COMPONENT_ID}
 sonar.projectVersion=${COMPONENT_VERSION}
+#sonar.projectDescription=
+#sonar.links.homepage=
+#sonar.links.ci=
+#sonar.links.issue=
+#sonar.links.scm=
+
+
 sonar.sourceEncoding=UTF-8
 sonar.sources=src
 sonar.exclusions=**/node_modules/**,**/*.spec.ts
