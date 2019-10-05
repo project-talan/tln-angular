@@ -34,7 +34,7 @@ node {
     printTopic('SCM variables')
     println(scmVars)
     //
-    // Bó able to work with standard pipeline and multibranch pipeline identically
+    // Be able to work with standard pipeline and multibranch pipeline identically
     printTopic('Build info')
     commitSha = scmVars.GIT_COMMIT
     buildBranch = scmVars.GIT_BRANCH
@@ -73,8 +73,8 @@ node {
     packageJson = readJSON file: 'package.json'
     env.COMPONENT_ID = packageJson.name
     env.COMPONENT_VERSION = packageJson.version
-    def ids = packageJson.name.split('.');
-    env.COMPONENT_ARTIFACT_ID = ids.removeLast()
+    def ids = packageJson.name.split('.') as List
+    env.COMPONENT_ARTIFACT_ID = ids.removeAt(ids.size()-1)
     env.COMPONENT_GROUP_ID = ids.join('.')
   }
     
