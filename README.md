@@ -22,13 +22,19 @@ To develop standalone project, just clone repository or create fork using your a
 * run **prereq.sh** script
 * Update environment variables inside **.env** file
 ```
+
+COMPONENT_GROUP_ID=io.company
+COMPONENT_ARTIFACT_ID=project
 COMPONENT_ID=io.company.project
-COMPONENT_VERSION=19.4.0
+COMPONENT_VERSION=19.10.0
 
 COMPONENT_PARAM_HOST=company.io
 COMPONENT_PARAM_LSTN=0.0.0.0
 COMPONENT_PARAM_PORT=80
 COMPONENT_PARAM_PORTS=443
+COMPONENT_PARAM_SSL_KEY=
+COMPONENT_PARAM_SSL_CERT=
+COMPONENT_PARAM_SSL_DHPARAM=
 ```
 * replace all accurencies of string **'org.talan.angular'** to you project id (for example **'io.company.project'**) inside **angular.json** file
 
