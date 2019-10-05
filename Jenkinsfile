@@ -8,7 +8,7 @@ properties([
     //
     string(name: 'SONARQUBE_SERVER', defaultValue: 'sonar4project-talan' ),
     string(name: 'SONARQUBE_SCANNER', defaultValue: 'sonar-scanner4project-talan'),
-    booleanParam(name: 'SONARQUBE_QUALITY_GATES', defaultValue: true),
+//    booleanParam(name: 'SONARQUBE_QUALITY_GATES', defaultValue: true),
     password(name: 'SONARQUBE_ACCESS_TOKEN', defaultValue: ${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}),
     password(name: 'GITHUB_ACCESS_TOKEN', defaultValue: ${PROJECT_TALAN_GITHUB_ACCESS_TOKEN})
   ])
