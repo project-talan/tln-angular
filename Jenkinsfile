@@ -98,7 +98,7 @@ node {
     }
 
     stage('SonarQube analysis') {
-      setGithubBuildStatus('quality_gates', 'PENDING', "${env.BUILD_URL}", commitSha)
+      setGithubBuildStatus('quality_gates', '', BUILD_URL, 'pending', commitSha);
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         printTopic('Sonarqube properties')
         echo sh(returnStdout: true, script: 'cat sonar-project.properties')
@@ -131,7 +131,7 @@ node {
               def qualitygate = readJSON text: qgResponse.content
               echo qualitygate.toString()
               if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                setGithubBuildStatus('quality_gates', 'FAILURE', "${env.BUILD_URL}", commitSha)
+                setGithubBuildStatus('quality_gates', '', BUILD_URL, 'failure', commitSha);
                 currentBuild.description = "Quality Gate failure"
                 error currentBuild.description
               }
@@ -139,7 +139,8 @@ node {
           }
         }
       }
-      setGithubBuildStatus('quality_gates', 'SUCCESS', "${env.BUILD_URL}", commitSha)
+      println('!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      setGithubBuildStatus('quality_gates', '', BUILD_URL, 'success', commitSha);
     }
     
     stage('Delivery') {
@@ -183,18 +184,23 @@ def printTopic(topic) {
 }
 
 /*
- *
+ * params:
+
+ * @context: 
+ * @description:
+ * @target_url:
+ * @state: error, failure, pending, or success
+ * @sha:
  */
-// 'PENDING', 'SUCCESS', 'FAILURE', 'ERROR'
-def setGithubBuildStatus(message, state, context, sha) {
+def setGithubBuildStatus(context, description, target_url, state, sha) {
   step([
     $class: "GitHubCommitStatusSetter",
     //reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/<your-repo-url>"],
     contextSource: [$class: "ManuallyEnteredCommitContextSource", context: context],
     errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
     commitShaSource: [$class: "ManuallyEnteredShaSource", sha: sha ],
-    //statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: "${BUILD_URL}<your-url>/"],
-    statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+    statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: target_url],
+    statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: description, state: state]] ]
   ]);
 }
 
