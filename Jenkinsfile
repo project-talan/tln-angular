@@ -1,10 +1,11 @@
 properties([
   parameters([
     // component specific parameters
-    string(name: 'COMPONENT_PARAM_HOST localhost', defaultValue: '' ),
-    string(name: 'COMPONENT_PARAM_LSTN 0.0.0.0', defaultValue: '' ),
-    string(name: 'COMPONENT_PARAM_PORT 8081', defaultValue: '' ),
-    string(name: 'COMPONENT_PARAM_PORTS 8444', defaultValue: '' ),
+    string(name: 'COMPONENT_PARAM_HOST', defaultValue: 'localhost' ),
+    string(name: 'COMPONENT_PARAM_LSTN', defaultValue: '0.0.0.0' ),
+    string(name: 'COMPONENT_PARAM_PORT', defaultValue: '9080' ),
+    string(name: 'COMPONENT_PARAM_PORTS', defaultValue: '9443' ),
+    string(name: 'TLN_TMP', defaultValue: "${PROJECT_TALAN_TMP}" ),
     //
     string(name: 'SONARQUBE_SERVER', defaultValue: 'sonar4project-talan' ),
     string(name: 'SONARQUBE_SCANNER', defaultValue: 'sonar-scanner4project-talan'),
@@ -68,6 +69,10 @@ node {
     }
     echo "[lastCommitAuthorEmail:${lastCommitAuthorEmail}]"
     //
+    // Create config for detached build
+    sh "echo '{\"detach-presets\": \"${TLN_TMP}\"}' > '.tlnclirc'"
+    
+    //
     // Get information from project's config
     printTopic('Package info')
     packageJson = readJSON file: 'package.json'
@@ -81,6 +86,7 @@ node {
   try {
 
     stage('Setup build environment') {
+    sh 'tln install --depends'
     }
 
     stage('Build') {
