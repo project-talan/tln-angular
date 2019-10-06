@@ -98,7 +98,7 @@ node {
     }
 
     stage('SonarQube analysis') {
-      setGithubBuildStatus('quality_gates', 'PENDING', ${env.BUILD_URL}, commitSha)
+      setGithubBuildStatus('quality_gates', 'PENDING', "${env.BUILD_URL}", commitSha)
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         printTopic('Sonarqube properties')
         echo sh(returnStdout: true, script: 'cat sonar-project.properties')
@@ -131,7 +131,7 @@ node {
               def qualitygate = readJSON text: qgResponse.content
               echo qualitygate.toString()
               if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                setGithubBuildStatus('quality_gates', 'FAILURE', ${env.BUILD_URL}, commitSha)
+                setGithubBuildStatus('quality_gates', 'FAILURE', "${env.BUILD_URL}", commitSha)
                 currentBuild.description = "Quality Gate failure"
                 error currentBuild.description
               }
@@ -139,7 +139,7 @@ node {
           }
         }
       }
-      setGithubBuildStatus('quality_gates', 'SUCCESS', ${env.BUILD_URL}, commitSha)
+      setGithubBuildStatus('quality_gates', 'SUCCESS', "${env.BUILD_URL}", commitSha)
     }
     
     stage('Delivery') {
