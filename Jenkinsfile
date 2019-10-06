@@ -48,6 +48,7 @@ node {
       // standard PR build
       pullRequest = true
       pullId = ghprbPullId
+      commitSha = params.ghprbActualCommit
     } else {
       // PUSH build
     }
