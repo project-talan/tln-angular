@@ -1,37 +1,174 @@
-def configBuildEnv(configFile) {
-  def tools = [
-    'openjdk': ['envs':['JAVA_HOME'], 'paths':['/bin'], 'validate':'java -version'],
-    'nodejs': ['envs':['NODEJS_HOME'], 'paths':['/bin'], 'validate':'node -v'],
-    'maven': ['envs':['MAVEN_HOME', 'M2_HOME'], 'paths':['/bin'], 'validate':'mvn -v']
-  ]
-  def config = [:]
-  if (fileExists(configFile)) {
-    print("Use Configuration from ${configFile}")
-    config = readJSON file: configFile
-  }else{
-    print('Default VM setup will be used')
-  }
-  printTopic('Build environment config')
-  print(config)
-  // configure
-  config.each { prop, val -> 
-    if (tools[prop]) {
-      sh "echo Configurint ${prop} using ${val} version"
-      def t = tool "${val}"
-      tools[prop].envs.each { e ->
-        env[e] = "${t}"
-      }
-      tools[prop].paths.each { p ->
-        env.PATH = "${t}${p}:${env.PATH}"
-      }
-      // validate setup
-      sh "${tools[prop].validate}"
+properties([
+  parameters([
+    // component specific parameters
+    string(name: 'COMPONENT_PARAM_HOST', defaultValue: 'localhost' ),
+    string(name: 'COMPONENT_PARAM_LSTN', defaultValue: '0.0.0.0' ),
+    string(name: 'COMPONENT_PARAM_PORT', defaultValue: '9080' ),
+    string(name: 'COMPONENT_PARAM_PORTS', defaultValue: '9443' ),
+    string(name: 'TLN_TMP', defaultValue: "${PROJECT_TALAN_TMP}" ),
+    //
+    string(name: 'SONARQUBE_SERVER', defaultValue: 'sonar4project-talan' ),
+    string(name: 'SONARQUBE_SCANNER', defaultValue: 'sonar-scanner4project-talan'),
+    booleanParam(name: 'SONARQUBE_QUALITY_GATES', defaultValue: true),
+    password(name: 'SONARQUBE_ACCESS_TOKEN', defaultValue: "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}"),
+    password(name: 'GITHUB_ACCESS_TOKEN', defaultValue: "${PROJECT_TALAN_GITHUB_ACCESS_TOKEN}")
+  ])
+])
+
+node {
+  // Define 
+  def pullRequest = false
+  def commitSha = ''
+  def buildBranch = ''
+  def pullId = ''
+  def lastCommitAuthorEmail = ''
+  def origin = ''
+  def repo = ''
+  def org = ''
+  def token = GITHUB_ACCESS_TOKEN
+
+  stage('Checkout') {
+    //
+    //
+    def scmVars = checkout scm
+    printTopic('Job input parameters');
+    println(params)
+    printTopic('SCM variables')
+    println(scmVars)
+    //
+    // Be able to work with standard pipeline and multibranch pipeline identically
+    printTopic('Build info')
+    commitSha = scmVars.GIT_COMMIT
+    buildBranch = scmVars.GIT_BRANCH
+    if (buildBranch.contains('PR-')) {
+      // multibranch PR build
+      pullRequest = true
+      pullId = CHANGE_ID
+    } else if (params.containsKey('sha1')){
+      // standard PR build
+      pullRequest = true
+      pullId = ghprbPullId
+      commitSha = params.ghprbActualCommit
+    } else {
+      // PUSH build
     }
+    echo "[PR:${pullRequest}] [BRANCH:${buildBranch}] [COMMIT: ${commitSha}] [PULL ID: ${pullId}]"
+    printTopic('Environment variables')
+    echo sh(returnStdout: true, script: 'env')
+    //
+    // Extract organisation and repository names
+    printTopic('Repo parameters')
+    origin = sh(returnStdout: true, script: 'git config --get remote.origin.url')
+    org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $2}' | rev''').trim()
+    repo = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $1}' | rev''').trim()
+    echo "[origin:${origin}] [org:${org}] [repo:${repo}]"
+    //
+    // Get authors' emails
+    printTopic('Author(s)')
+    lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log --format="%ae" HEAD^!''').trim()
+    if (!pullRequest){
+      lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log -2 --format="%ae" | paste -s -d ",\n"''').trim()
+    }
+    echo "[lastCommitAuthorEmail:${lastCommitAuthorEmail}]"
+    //
+    // Create config for detached build
+    sh "echo '{\"detach-presets\": \"${TLN_TMP}\"}' > '.tlnclirc'"
+    
+    //
+    // Get information from project's config
+    printTopic('Package info')
+    packageJson = readJSON file: 'package.json'
+    env.COMPONENT_ID = packageJson.name
+    env.COMPONENT_VERSION = packageJson.version
+    def ids = packageJson.name.split('[.]') as List
+    env.COMPONENT_ARTIFACT_ID = ids.removeAt(ids.size()-1)
+    env.COMPONENT_GROUP_ID = ids.join('.')
+  }
+    
+  try {
+
+    stage('Setup build environment') {
+    sh 'tln install --depends'
+    }
+
+    stage('Build') {
+    sh 'tln prereq:init:build'
+    }
+
+    stage('Unit tests') {
+    sh 'tln lint:test'
+    }
+
+    stage('SonarQube analysis') {
+      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'pending', commitSha);
+      if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
+        printTopic('Sonarqube properties')
+        echo sh(returnStdout: true, script: 'cat sonar-project.properties')
+        def scannerHome = tool "${SONARQUBE_SCANNER}"
+        withSonarQubeEnv("${SONARQUBE_SERVER}") {
+          if (pullRequest){
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${pullId} -Dsonar.github.repository=${org}/${repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
+          } else {
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
+            // check SonarQube Quality Gates
+            if (SONARQUBE_QUALITY_GATES.toString().toBoolean()) {
+              //// Pipeline Utility Steps
+              def props = readProperties  file: '.scannerwork/report-task.txt'
+              echo "properties=${props}"
+              def sonarServerUrl=props['serverUrl']
+              def ceTaskUrl= props['ceTaskUrl']
+              def ceTask
+              //// HTTP Request Plugin
+              timeout(time: 1, unit: 'MINUTES') {
+                waitUntil {
+                  def response = httpRequest "${ceTaskUrl}"
+                  println('Status: '+response.status)
+                  println('Response: '+response.content)
+                  ceTask = readJSON text: response.content
+                  return (response.status == 200) && ("SUCCESS".equals(ceTask['task']['status']))
+                }
+              }
+              //
+              def qgResponse = httpRequest sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask['task']['analysisId']
+              def qualitygate = readJSON text: qgResponse.content
+              echo qualitygate.toString()
+              if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
+                setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'failure', commitSha);
+                currentBuild.description = "Quality Gate failure"
+                error currentBuild.description
+              }
+            }
+          }
+        }
+      }
+      println('!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'success', commitSha);
+    }
+
+    stage('Delivery') {
+      if (pullRequest){
+      } else {
+        // create docker, push artifacts to the Harbor/Nexus/etc.
+        // archiveArtifacts artifacts: 'path/2/artifact'
+      }
+    }
+
+    stage('Deploy') {
+      if (pullRequest){
+      } else {
+      }
+    }
+  } catch (e) {
+    sendEmailNotification('BUILD FAILED', lastCommitAuthorEmail, e.toString())
+    throw e
   }
 }
 
-def sendEmailNotification(subj, recepients) {
-    emailext body: "${BUILD_URL}",
+/*
+ *
+ */
+def sendEmailNotification(subj, recepients, traceStack) {
+    emailext body: "${BUILD_URL}\n${traceStack}",
     recipientProviders: [
       [$class: 'CulpritsRecipientProvider'],
       [$class: 'DevelopersRecipientProvider'],
@@ -40,122 +177,38 @@ def sendEmailNotification(subj, recepients) {
     subject: subj,
     to: "${recepients}"
 }
+
+/*
+ *
+ */
 def printTopic(topic) {
   println("[*] ${topic} ".padRight(80, '-'))
 }
 
-node {
-  //
-  def pullRequest = false
-  def commitSha = ''
-  def buildBranch = ''
-  def pullId = ''
-  def lastCommitAuthorEmail = ''
-  def repo = ''
-  def org = ''
-  //
-  stage('Clone sources') {
-    //
-    def scmVars = checkout scm
-    printTopic('Job input parameters');
-    println(params)
-    printTopic('SCM variables')
-    println(scmVars)
-    // configure build env
-    configBuildEnv('build.conf.json');
-    //
-    commitSha = scmVars.GIT_COMMIT
-    buildBranch = scmVars.GIT_BRANCH
-    if (buildBranch.contains('PR-')) {
-      pullRequest = true
-      pullId = CHANGE_ID
-    } else if (params.containsKey('sha1')){
-      pullRequest = true
-      pullId = ghprbPullId
-    } else {
-    }
-    //
-    printTopic('Package info')
-    packageJson = readJSON file: 'package.json'
-    env.COMPONENT_ID = packageJson.name
-    env.COMPONENT_VERSION = packageJson.version
-    echo sh(returnStdout: true, script: 'rm -f .env sonar-project.properties')
-    //
-    printTopic('Build info')
-    echo "[PR:${pullRequest}] [BRANCH:${buildBranch}] [COMMIT: ${commitSha}] [PULL ID: ${pullId}]"
-    printTopic('Environment variables')
-    echo sh(returnStdout: true, script: 'env')
-    //
-    org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $2}' | rev''').trim()
-    repo = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $1}' | rev''').trim()
-    //
-    printTopic('Repo parameters')
-    echo sh(returnStdout: true, script: 'git config --get remote.origin.url')
-    echo "[org:${org}] [repo:${repo}]"
-    //
-    lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log --format="%ae" HEAD^!''').trim()
-    if (!pullRequest){
-      lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log -2 --format="%ae" | paste -s -d ",\n"''').trim()
-    }
-    printTopic('Author(s)')
-    echo "[lastCommitAuthorEmail:${lastCommitAuthorEmail}]"
-  }
-  //
-  stage('Build') {
-    sh 'tln prereq:init:build'
-  }
-  //
-  stage('Unit tests') {
-    sh 'tln lint:test'
-  }
-  //
-  stage('SonarQube') {
-    printTopic('Sonarqube properties')
-    echo sh(returnStdout: true, script: 'cat sonar-project.properties')
-    def scannerHome = tool "${SONARQUBE_SCANNER}"
-    withSonarQubeEnv("${SONARQUBE_SERVER}") {
-      if (pullRequest){
-        sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${pullId} -Dsonar.github.repository=${org}/${repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
-      } else {
-        sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
-        // check SonarQube Quality Gates
-        //// Pipeline Utility Steps
-        def props = readProperties  file: '.scannerwork/report-task.txt'
-        echo "properties=${props}"
-        def sonarServerUrl=props['serverUrl']
-        def ceTaskUrl= props['ceTaskUrl']
-        def ceTask
-        //// HTTP Request Plugin
-        timeout(time: 1, unit: 'MINUTES') {
-          waitUntil {
-            def response = httpRequest "${ceTaskUrl}"
-            println('Status: '+response.status)
-            println('Response: '+response.content)
-            ceTask = readJSON text: response.content
-            return (response.status == 200) && ("SUCCESS".equals(ceTask['task']['status']))
-          }
-        }
-        //
-        def qgResponse = httpRequest sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask['task']['analysisId']
-        def qualitygate = readJSON text: qgResponse.content
-        echo qualitygate.toString()
-        if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-          currentBuild.description = "Quality Gate failure"
-          error currentBuild.description
-        }
-      }
-    }
-  }
-  //
-  stage('Delivery') {
-    //if (pullRequest){
-    //} else {
-    //  sh "./upload.sh ${groupId} ${artifactId} ${version} ./services/grizzly-jersey/target"
-    //}
-    //archiveArtifacts artifacts: 'mobile/platforms/android/build/outputs/apk/*.apk'
-  }
-  //
-  stage('Deploy') {
-  }
-  //
+/*
+ * params:
+
+ * @org:
+ * @repo:
+ * @token:
+ * @context:
+ * @description:
+ * @target_url:
+ * @state: error, failure, pending, or success
+ * @sha:
+ */
+def setGithubBuildStatus(org, repo, token, context, description, target_url, state, sha) {
+  sh "curl -s 'https://api.github.com/repos/${org}/${repo}/statuses/${sha}?access_token=${token}' -H 'Content-Type: application/json' -X POST -d '{\"state\": \"${state}\", \"description\": \"${description}\", \"target_url\": \"${target_url}\", \"context\": \"${context}\" }'"
+  /*
+  step([
+    $class: "GitHubCommitStatusSetter",
+    //reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/<your-repo-url>"],
+    contextSource: [$class: "ManuallyEnteredCommitContextSource", context: context],
+    errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+    commitShaSource: [$class: "ManuallyEnteredShaSource", sha: sha ],
+    statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: target_url],
+    statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: description, state: state]] ]
+  ]);
+  */
 }
+

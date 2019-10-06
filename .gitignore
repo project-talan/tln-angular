@@ -112,3 +112,4 @@ sonar-project.properties
 default.conf
 /ssl
 /mobile
+.tlnclirc
