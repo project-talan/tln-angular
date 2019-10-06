@@ -197,7 +197,7 @@ def printTopic(topic) {
  * @sha:
  */
 def setGithubBuildStatus(org, repo, token, context, description, target_url, state, sha) {
-  sh "curl 'https://api.github.com/repos/${org}/${repo}/statuses/${sha}?access_token=${token}' -H 'Content-Type: application/json' -X POST -d '{\"state\": \"${state}\", \"description\": \"${description}\", \"target_url\": \"${target_url}\", \"context\": \"${context}\" }'"
+  sh "curl -s 'https://api.github.com/repos/${org}/${repo}/statuses/${sha}?access_token=${token}' -H 'Content-Type: application/json' -X POST -d '{\"state\": \"${state}\", \"description\": \"${description}\", \"target_url\": \"${target_url}\", \"context\": \"${context}\" }'"
   /*
   step([
     $class: "GitHubCommitStatusSetter",
