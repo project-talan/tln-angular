@@ -25,6 +25,7 @@ node {
   def origin = ''
   def repo = ''
   def org = ''
+  def token = GITHUB_ACCESS_TOKEN
 
   stage('Checkout') {
     //
@@ -47,6 +48,7 @@ node {
       // standard PR build
       pullRequest = true
       pullId = ghprbPullId
+      commitSha = params.ghprbActualCommit
     } else {
       // PUSH build
     }
@@ -98,7 +100,7 @@ node {
     }
 
     stage('SonarQube analysis') {
-      setGithubBuildStatus('quality_gates', '', BUILD_URL, 'pending', commitSha);
+      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'pending', commitSha);
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         printTopic('Sonarqube properties')
         echo sh(returnStdout: true, script: 'cat sonar-project.properties')
@@ -131,7 +133,7 @@ node {
               def qualitygate = readJSON text: qgResponse.content
               echo qualitygate.toString()
               if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                setGithubBuildStatus('quality_gates', '', BUILD_URL, 'failure', commitSha);
+                setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'failure', commitSha);
                 currentBuild.description = "Quality Gate failure"
                 error currentBuild.description
               }
@@ -139,16 +141,16 @@ node {
           }
         }
       }
-      setGithubBuildStatus('quality_gates', '', BUILD_URL, 'success', commitSha);
+      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'success', commitSha);
     }
-    
+
     stage('Delivery') {
       if (pullRequest){
       } else {
         // create docker, push artifacts to the Harbor/Nexus/etc.
         // archiveArtifacts artifacts: 'path/2/artifact'
       }
-    }   
+    }
 
     stage('Deploy') {
       if (pullRequest){
@@ -185,13 +187,18 @@ def printTopic(topic) {
 /*
  * params:
 
- * @context: 
+ * @org:
+ * @repo:
+ * @token:
+ * @context:
  * @description:
  * @target_url:
  * @state: error, failure, pending, or success
  * @sha:
  */
-def setGithubBuildStatus(context, description, target_url, state, sha) {
+def setGithubBuildStatus(org, repo, token, context, description, target_url, state, sha) {
+  sh "curl -s 'https://api.github.com/repos/${org}/${repo}/statuses/${sha}?access_token=${token}' -H 'Content-Type: application/json' -X POST -d '{\"state\": \"${state}\", \"description\": \"${description}\", \"target_url\": \"${target_url}\", \"context\": \"${context}\" }'"
+  /*
   step([
     $class: "GitHubCommitStatusSetter",
     //reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/<your-repo-url>"],
@@ -201,5 +208,6 @@ def setGithubBuildStatus(context, description, target_url, state, sha) {
     statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: target_url],
     statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: description, state: state]] ]
   ]);
+  */
 }
 
