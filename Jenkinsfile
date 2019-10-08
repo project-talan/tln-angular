@@ -141,7 +141,6 @@ node {
           }
         }
       }
-      println('!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
       setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'success', commitSha);
     }
 
