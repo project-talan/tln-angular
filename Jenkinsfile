@@ -61,7 +61,7 @@ node {
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         def scannerHome = tool "${SONARQUBE_SCANNER}"
         withSonarQubeEnv("${SONARQUBE_SERVER}") {
-          if (pullRequest){
+          if (helper.isPullRequest){
             sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${pullId} -Dsonar.github.repository=${org}/${repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
           } else {
             sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
@@ -100,7 +100,7 @@ node {
     }
 
     stage('Delivery') {
-      if (pullRequest){
+      if (helper.isPullRequest){
       } else {
         // create docker, push artifacts to the Harbor/Nexus/etc.
         // archiveArtifacts artifacts: 'path/2/artifact'
@@ -108,29 +108,17 @@ node {
     }
 
     stage('Deploy') {
-      if (pullRequest){
+      if (helper.isPullRequest){
       } else {
       }
     }
   } catch (e) {
-    sendEmailNotification('BUILD FAILED', lastCommitAuthorEmail, e.toString())
+    def traceStack = e.toString()
+    helper.sendEmailNotification('BUILD FAILED', "${BUILD_URL}\n${traceStack}")
     throw e
   }
 }
 
-/*
- *
- */
-def sendEmailNotification(subj, recepients, traceStack) {
-    emailext body: "${BUILD_URL}\n${traceStack}",
-    recipientProviders: [
-      [$class: 'CulpritsRecipientProvider'],
-      [$class: 'DevelopersRecipientProvider'],
-      [$class: 'RequesterRecipientProvider']
-    ],
-    subject: subj,
-    to: "${recepients}"
-}
 
 /*
  *
