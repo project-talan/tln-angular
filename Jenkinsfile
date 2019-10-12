@@ -25,7 +25,8 @@ node {
   stage('Checkout') {
     //
     // Let helper resolve build properties
-    helper.collectBuildInfo((checkout scm), params)
+    def scmVars = checkout scm
+    helper.collectBuildInfo(scmVars, params)
     //
     // Create config for detached build
     sh "echo '{\"detach-presets\": \"${TLN_TMP}\"}' > '.tlnclirc'"
