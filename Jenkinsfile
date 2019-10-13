@@ -46,15 +46,15 @@ node {
   try {
 
     stage('Setup build environment') {
-      // sh 'tln install --depends'
+      sh 'tln install --depends'
     }
 
     stage('Build') {
-      // sh 'tln prereq:init:build'
+      sh 'tln prereq:init:build'
     }
 
     stage('Unit tests') {
-      // sh 'tln lint:test'
+      sh 'tln lint:test'
     }
 
     stage('SonarQube analysis') {
