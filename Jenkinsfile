@@ -57,6 +57,8 @@ node {
     }
 
     stage('SonarQube analysis') {
+      helper.runSonarQubeChecks(SONARQUBE_SCANNER, SONARQUBE_SERVER, SONARQUBE_QUALITY_GATES.toString().toBoolean())
+      /*/
       helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'pending');
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         def scannerHome = tool "${SONARQUBE_SCANNER}"
@@ -97,6 +99,7 @@ node {
         }
       }
       helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'success');
+      /*/
     }
 
     stage('Delivery') {
