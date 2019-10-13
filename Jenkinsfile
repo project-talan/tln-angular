@@ -61,7 +61,7 @@ node {
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
         def scannerHome = tool "${SONARQUBE_SCANNER}"
         withSonarQubeEnv("${SONARQUBE_SERVER}") {
-          if (helper.isPullRequest){
+          if (helper.pullRequest){
             sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${helper.pullId} -Dsonar.github.repository=${helper.org}/${helper.repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
           } else {
             sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
@@ -100,7 +100,7 @@ node {
     }
 
     stage('Delivery') {
-      if (helper.isPullRequest){
+      if (helper.pullRequest){
       } else {
         // create docker, push artifacts to the Harbor/Nexus/etc.
         // archiveArtifacts artifacts: 'path/2/artifact'
@@ -108,7 +108,7 @@ node {
     }
 
     stage('Deploy') {
-      if (helper.isPullRequest){
+      if (helper.pullRequest){
       } else {
       }
     }
