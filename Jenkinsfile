@@ -88,7 +88,7 @@ node {
               def qualitygate = readJSON text: qgResponse.content
               echo qualitygate.toString()
               if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'failure', commitSha);
+                helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'failure');
                 currentBuild.description = "Quality Gate failure"
                 error currentBuild.description
               }
@@ -96,7 +96,7 @@ node {
           }
         }
       }
-      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'success', commitSha);
+      helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'success');
     }
 
     stage('Delivery') {
