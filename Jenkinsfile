@@ -1,3 +1,6 @@
+@Library('tln-jenkins-shared-libraries@0.1.0')
+import org.talan.jenkins.*
+
 properties([
   parameters([
     // component specific parameters
@@ -16,67 +19,21 @@ properties([
 ])
 
 node {
-  // Define 
-  def pullRequest = false
-  def commitSha = ''
-  def buildBranch = ''
-  def pullId = ''
-  def lastCommitAuthorEmail = ''
-  def origin = ''
-  def repo = ''
-  def org = ''
-  def token = GITHUB_ACCESS_TOKEN
-
+  //
+  def helper = new ScmHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
+  //
   stage('Checkout') {
     //
-    //
+    // Let helper resolve build properties
     def scmVars = checkout scm
-    printTopic('Job input parameters');
-    println(params)
-    printTopic('SCM variables')
-    println(scmVars)
-    //
-    // Be able to work with standard pipeline and multibranch pipeline identically
-    printTopic('Build info')
-    commitSha = scmVars.GIT_COMMIT
-    buildBranch = scmVars.GIT_BRANCH
-    if (buildBranch.contains('PR-')) {
-      // multibranch PR build
-      pullRequest = true
-      pullId = CHANGE_ID
-    } else if (params.containsKey('sha1')){
-      // standard PR build
-      pullRequest = true
-      pullId = ghprbPullId
-      commitSha = params.ghprbActualCommit
-    } else {
-      // PUSH build
-    }
-    echo "[PR:${pullRequest}] [BRANCH:${buildBranch}] [COMMIT: ${commitSha}] [PULL ID: ${pullId}]"
-    printTopic('Environment variables')
-    echo sh(returnStdout: true, script: 'env')
-    //
-    // Extract organisation and repository names
-    printTopic('Repo parameters')
-    origin = sh(returnStdout: true, script: 'git config --get remote.origin.url')
-    org = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $2}' | rev''').trim()
-    repo = sh(returnStdout: true, script:'''git config --get remote.origin.url | rev | awk -F'[./:]' '{print $1}' | rev''').trim()
-    echo "[origin:${origin}] [org:${org}] [repo:${repo}]"
-    //
-    // Get authors' emails
-    printTopic('Author(s)')
-    lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log --format="%ae" HEAD^!''').trim()
-    if (!pullRequest){
-      lastCommitAuthorEmail = sh(returnStdout: true, script:'''git log -2 --format="%ae" | paste -s -d ",\n"''').trim()
-    }
-    echo "[lastCommitAuthorEmail:${lastCommitAuthorEmail}]"
+    helper.collectBuildInfo(scmVars, params)
     //
     // Create config for detached build
     sh "echo '{\"detach-presets\": \"${TLN_TMP}\"}' > '.tlnclirc'"
     
     //
     // Get information from project's config
-    printTopic('Package info')
+    helper.printTopic('Package info')
     packageJson = readJSON file: 'package.json'
     env.COMPONENT_ID = packageJson.name
     env.COMPONENT_VERSION = packageJson.version
@@ -88,26 +45,24 @@ node {
   try {
 
     stage('Setup build environment') {
-    sh 'tln install --depends'
+      sh 'tln install --depends'
     }
 
     stage('Build') {
-    sh 'tln prereq:init:build'
+      sh 'tln prereq:init:build'
     }
 
     stage('Unit tests') {
-    sh 'tln lint:test'
+      sh 'tln lint:test'
     }
 
     stage('SonarQube analysis') {
-      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'pending', commitSha);
+      helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'pending');
       if (SONARQUBE_SERVER && SONARQUBE_SCANNER) {
-        printTopic('Sonarqube properties')
-        echo sh(returnStdout: true, script: 'cat sonar-project.properties')
         def scannerHome = tool "${SONARQUBE_SCANNER}"
         withSonarQubeEnv("${SONARQUBE_SERVER}") {
-          if (pullRequest){
-            sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${pullId} -Dsonar.github.repository=${org}/${repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
+          if (helper.isPullRequest){
+            sh "${scannerHome}/bin/sonar-scanner -Dsonar.analysis.mode=preview -Dsonar.github.pullRequest=${helper.pullId} -Dsonar.github.repository=${helper.org}/${helper.repo} -Dsonar.github.oauth=${GITHUB_ACCESS_TOKEN} -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
           } else {
             sh "${scannerHome}/bin/sonar-scanner -Dsonar.login=${SONARQUBE_ACCESS_TOKEN}"
             // check SonarQube Quality Gates
@@ -133,7 +88,7 @@ node {
               def qualitygate = readJSON text: qgResponse.content
               echo qualitygate.toString()
               if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'failure', commitSha);
+                helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'failure');
                 currentBuild.description = "Quality Gate failure"
                 error currentBuild.description
               }
@@ -141,11 +96,11 @@ node {
           }
         }
       }
-      setGithubBuildStatus(org, repo, token, 'quality_gates', '', BUILD_URL, 'success', commitSha);
+      helper.setGithubBuildStatus('quality_gates', '', BUILD_URL, 'success');
     }
 
     stage('Delivery') {
-      if (pullRequest){
+      if (helper.isPullRequest){
       } else {
         // create docker, push artifacts to the Harbor/Nexus/etc.
         // archiveArtifacts artifacts: 'path/2/artifact'
@@ -153,61 +108,20 @@ node {
     }
 
     stage('Deploy') {
-      if (pullRequest){
+      if (helper.isPullRequest){
       } else {
       }
     }
   } catch (e) {
-    sendEmailNotification('BUILD FAILED', lastCommitAuthorEmail, e.toString())
+    def traceStack = e.toString()
+    helper.sendEmailNotification('BUILD FAILED', "${BUILD_URL}\n${traceStack}")
     throw e
   }
 }
 
-/*
- *
- */
-def sendEmailNotification(subj, recepients, traceStack) {
-    emailext body: "${BUILD_URL}\n${traceStack}",
-    recipientProviders: [
-      [$class: 'CulpritsRecipientProvider'],
-      [$class: 'DevelopersRecipientProvider'],
-      [$class: 'RequesterRecipientProvider']
-    ],
-    subject: subj,
-    to: "${recepients}"
-}
 
 /*
  *
  */
-def printTopic(topic) {
-  println("[*] ${topic} ".padRight(80, '-'))
-}
 
-/*
- * params:
-
- * @org:
- * @repo:
- * @token:
- * @context:
- * @description:
- * @target_url:
- * @state: error, failure, pending, or success
- * @sha:
- */
-def setGithubBuildStatus(org, repo, token, context, description, target_url, state, sha) {
-  sh "curl -s 'https://api.github.com/repos/${org}/${repo}/statuses/${sha}?access_token=${token}' -H 'Content-Type: application/json' -X POST -d '{\"state\": \"${state}\", \"description\": \"${description}\", \"target_url\": \"${target_url}\", \"context\": \"${context}\" }'"
-  /*
-  step([
-    $class: "GitHubCommitStatusSetter",
-    //reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/<your-repo-url>"],
-    contextSource: [$class: "ManuallyEnteredCommitContextSource", context: context],
-    errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-    commitShaSource: [$class: "ManuallyEnteredShaSource", sha: sha ],
-    statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: target_url],
-    statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: description, state: state]] ]
-  ]);
-  */
-}
 
