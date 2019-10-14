@@ -1,5 +1,5 @@
 // https://github.com/project-talan/tln-jenkins-shared-libraries
-@Library('tln-jenkins-shared-libraries@0.1.0')
+@Library('tln-jenkins-shared-libraries@0.1.0') _
 //import org.talan.jenkins.*
 
 
