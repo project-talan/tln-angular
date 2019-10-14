@@ -1,6 +1,6 @@
 // https://github.com/project-talan/tln-jenkins-shared-libraries
 @Library('tln-jenkins-shared-libraries@0.1.0')
-import org.talan.jenkins.*
+//import org.talan.jenkins.*
 
 
 properties([
