@@ -10,8 +10,8 @@ properties([
       //'COMPONENT_PARAM_LSTN': '',
       //'COMPONENT_PARAM_PORT': '',
       //'COMPONENT_PARAM_PORTS': '',
-      'TALAN_PRESETS_PATH': "${PROJECT_TALAN_TMP}"
-      'SONARQUBE_SERVER': 'sonar4project-talan'
+      'TALAN_PRESETS_PATH': "${PROJECT_TALAN_TMP}",
+      'SONARQUBE_SERVER': 'sonar4project-talan',
       'SONARQUBE_SCANNER': 'sonar-scanner4project-talan',
       'SONARQUBE_QUALITY_GATES': true,
       'SONARQUBE_ACCESS_TOKEN': "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}",
