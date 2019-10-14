@@ -2,21 +2,22 @@
 @Library('tln-jenkins-shared-libraries@0.1.0')
 import org.talan.jenkins.*
 
+
 properties([
-  parameters([
-    // component specific parameters
-    string(name: 'COMPONENT_PARAM_HOST', defaultValue: 'localhost' ),
-    string(name: 'COMPONENT_PARAM_LSTN', defaultValue: '0.0.0.0' ),
-    string(name: 'COMPONENT_PARAM_PORT', defaultValue: '9080' ),
-    string(name: 'COMPONENT_PARAM_PORTS', defaultValue: '9443' ),
-    string(name: 'TLN_TMP', defaultValue: "${PROJECT_TALAN_TMP}" ),
-    //
-    string(name: 'SONARQUBE_SERVER', defaultValue: 'sonar4project-talan' ),
-    string(name: 'SONARQUBE_SCANNER', defaultValue: 'sonar-scanner4project-talan'),
-    booleanParam(name: 'SONARQUBE_QUALITY_GATES', defaultValue: true),
-    password(name: 'SONARQUBE_ACCESS_TOKEN', defaultValue: "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}"),
-    password(name: 'GITHUB_ACCESS_TOKEN', defaultValue: "${PROJECT_TALAN_GITHUB_ACCESS_TOKEN}")
-  ])
+  parameters(
+    componentParams.getCommonParameters(paramConstant.PARAMS_COMMON, [
+      //'COMPONENT_PARAM_HOST': '',
+      //'COMPONENT_PARAM_LSTN': '',
+      //'COMPONENT_PARAM_PORT': '',
+      //'COMPONENT_PARAM_PORTS': '',
+      'TALAN_PRESETS_PATH': "${PROJECT_TALAN_TMP}"
+      'SONARQUBE_SERVER': 'sonar4project-talan'
+      'SONARQUBE_SCANNER': 'sonar-scanner4project-talan',
+      'SONARQUBE_QUALITY_GATES': true,
+      'SONARQUBE_ACCESS_TOKEN': "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}",
+      'GITHUB_ACCESS_TOKEN': "${PROJECT_TALAN_GITHUB_ACCESS_TOKEN}"
+    ])
+  )
 ])
 
 node {
@@ -80,10 +81,3 @@ node {
     throw e
   }
 }
-
-
-/*
- *
- */
-
-
