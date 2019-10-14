@@ -1,6 +1,6 @@
 // https://github.com/project-talan/tln-jenkins-shared-libraries
 @Library('tln-jenkins-shared-libraries@0.1.0') _
-import org.talan.jenkins.*
+//import org.talan.jenkins.*
 
 
 properties([
@@ -22,7 +22,7 @@ properties([
 
 node {
   //
-  def helper = new ScmHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
+  def helper = new library('tln-jenkins-shared-libraries@0.1.0').org.talan.jenkins.ScmHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
   //
   stage('Checkout') {
     //
