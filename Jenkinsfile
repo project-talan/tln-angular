@@ -31,7 +31,7 @@ node {
     helper.collectBuildInfo(scmVars, params)
     //
     // Create config for detached build
-    sh "echo '{\"detach-presets\": \"${TLN_TMP}\"}' > '.tlnclirc'"
+    sh "echo '{\"detach-presets\": \"${TALAN_PRESETS_PATH}\"}' > '.tlnclirc'"
     
     //
     // Get information from project's config
