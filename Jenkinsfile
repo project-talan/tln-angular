@@ -22,7 +22,7 @@ properties([
 
 node {
   //
-  def helper = new scmHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
+  def helper = new buildHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
   //
   stage('Checkout') {
     //
