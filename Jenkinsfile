@@ -34,13 +34,7 @@ node {
     
     //
     // Get information from project's config
-    helper.printTopic('Package info')
-    packageJson = readJSON file: 'package.json'
-    env.COMPONENT_ID = packageJson.name
-    env.COMPONENT_VERSION = packageJson.version
-    def ids = packageJson.name.split('[.]') as List
-    env.COMPONENT_ARTIFACT_ID = ids.removeAt(ids.size()-1)
-    env.COMPONENT_GROUP_ID = ids.join('.')
+    [env.COMPONENT_GROUP_ID, env.COMPONENT_ARTIFACT_ID, env.COMPONENT_ID, env.COMPONENT_VERSION] = helper.getInfoFromPackageJson()
   }
     
   try {
