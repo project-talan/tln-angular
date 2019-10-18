@@ -34,7 +34,7 @@ node {
     
     //
     // Get information from project's config
-    [groupId, artifactId, id, version] = helper.getInfoFromPackageJson()
+    (groupId, artifactId, id, version) = helper.getInfoFromPackageJson()
     env.COMPONENT_GROUP_ID = groupId
     env.COMPONENT_ARTIFACT_ID = artifactId
     env.COMPONENT_ID = id
