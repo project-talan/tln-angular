@@ -1,5 +1,5 @@
 // https://github.com/project-talan/tln-jenkins-shared-libraries
-@Library('tln-jenkins-shared-libraries@0.1.0') _
+@Library('tln-jenkins-shared-libraries@19.10.0') _
 import org.talan.jenkins.*
 
 properties([
@@ -31,7 +31,7 @@ node {
     //
     // Create config for detached build
     sh "echo '{\"detach-presets\": \"${TALAN_PRESETS_PATH}\"}' > '.tlnclirc'"
-    
+
     //
     // Get information from project's config
     (groupId, artifactId, id, version) = helper.getInfoFromPackageJson()
