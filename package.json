@@ -1,6 +1,6 @@
 {
   "name": "sh.tln.angular",
-  "version": "19.10.0",
+  "version": "20.7.0",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
