@@ -1,27 +1,29 @@
 // https://github.com/project-talan/tln-jenkins-shared-libraries
-@Library('tln-jenkins-shared-libraries@19.10.0') _
-import org.talan.jenkins.*
+@Library('tln-jenkins-shared-libraries@20.5.0') _
+import sh.tln.jenkins.*
 
 properties([
   parameters(
-    componentParams.getCommonParameters(paramConstant.PARAMS_COMMON, [
-      //'COMPONENT_PARAM_HOST': '',
-      //'COMPONENT_PARAM_LSTN': '',
-      //'COMPONENT_PARAM_PORT': '',
-      //'COMPONENT_PARAM_PORTS': '',
-      'TALAN_PRESETS_PATH': "${PROJECT_TALAN_TMP}",
-      'SONARQUBE_SERVER': 'sonar4project-talan',
-      'SONARQUBE_SCANNER': 'sonar-scanner4project-talan',
-      'SONARQUBE_QUALITY_GATES': true,
-      'SONARQUBE_ACCESS_TOKEN': "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}",
-      'GITHUB_ACCESS_TOKEN': "${PROJECT_TALAN_GITHUB_ACCESS_TOKEN}"
+    componentParams.getCommonParameters(paramConstant.TLN_PARAMS_COMMON | paramConstant.TLN_PARAMS_SCM | paramConstant.TLN_PARAMS_SONARQUBE, [
+      //'TLN_COMPONENT_PARAM_HOST': '',
+      //'TLN_COMPONENT_PARAM_LSTN': '',
+      //'TLN_COMPONENT_PARAM_PORT': '',
+      //'TLN_COMPONENT_PARAM_PORTS': '',
+      //'TLN_LOCAL_REPO': '',
+
+      'TLN_GITHUB_ACCESS_TOKEN': "${PROJECT_TALAN_GITHUB_ACCESS_TOKEN}",
+
+      'TLN_SONARQUBE_SERVER': "${PROJECT_TALAN_SONARQUBE_SERVER}",
+      'TLN_SONARQUBE_SCANNER': "${PROJECT_TALAN_SONARQUBE_SCANNER}",
+      'TLN_SONARQUBE_QUALITY_GATES': true,
+      'TLN_SONARQUBE_ACCESS_TOKEN': "${PROJECT_TALAN_SONARQUBE_ACCESS_TOKEN}"
     ])
   )
 ])
 
 node {
   //
-  def helper = new buildHelper(this, SONARQUBE_ACCESS_TOKEN, GITHUB_ACCESS_TOKEN)
+  def helper = new buildHelper(this, TLN_SONARQUBE_ACCESS_TOKEN, TLN_GITHUB_ACCESS_TOKEN)
   //
   stage('Checkout') {
     //
@@ -30,17 +32,17 @@ node {
     helper.collectBuildInfo(scmVars, params)
     //
     // Create config for detached build
-    sh "echo '{\"detach-presets\": \"${TALAN_PRESETS_PATH}\"}' > '.tlnclirc'"
+    sh "echo '{\"detach\": true}' > '.tlnrc'"
 
     //
     // Get information from project's config
-    (groupId, artifactId, id, version) = helper.getInfoFromPackageJson()
-    env.COMPONENT_GROUP_ID = groupId
-    env.COMPONENT_ARTIFACT_ID = artifactId
-    env.COMPONENT_ID = id
-    env.COMPONENT_VERSION = version
+    (groupId, artifactId, uid, version) = helper.getInfoFromPackageJson()
+    env.TLN_COMPONENT_GROUP_ID = groupId
+    env.TLN_COMPONENT_ARTIFACT_ID = artifactId
+    env.TLN_COMPONENT_UID = uid
+    env.TLN_COMPONENT_VERSION = version
   }
-    
+
   try {
 
     stage('Setup build environment') {
@@ -52,11 +54,11 @@ node {
     }
 
     stage('Unit tests') {
-      sh 'tln lint:test'
+      sh 'tln test'
     }
 
     stage('SonarQube analysis') {
-      helper.runSonarQubeChecks(SONARQUBE_SCANNER, SONARQUBE_SERVER, SONARQUBE_QUALITY_GATES.toString().toBoolean())
+      //helper.runSonarQubeChecks(TLN_SONARQUBE_SCANNER, TLN_SONARQUBE_SERVER, TLN_SONARQUBE_QUALITY_GATES.toString().toBoolean())
     }
 
     stage('Delivery') {
